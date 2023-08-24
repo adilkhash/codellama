@@ -16,6 +16,9 @@ from fairscale.nn.model_parallel.layers import (
 from torch import nn
 
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+
 @dataclass
 class ModelArgs:
     dim: int = 4096
@@ -133,7 +136,7 @@ class Attention(nn.Module):
                 self.n_local_kv_heads,
                 self.head_dim,
             )
-        ).cuda()
+        ).to(device)
         self.cache_v = torch.zeros(
             (
                 args.max_batch_size,
@@ -141,7 +144,7 @@ class Attention(nn.Module):
                 self.n_local_kv_heads,
                 self.head_dim,
             )
-        ).cuda()
+        ).to(device)
 
     def forward(
         self,
