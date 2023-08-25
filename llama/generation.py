@@ -154,8 +154,14 @@ class Llama:
         prev_pos = 0
         stop_reached = torch.tensor([False] * bsz, device=device)
         input_text_mask = tokens != pad_id
+        token_times = []
         for cur_pos in range(min_prompt_len, total_len):
+            t = time.time()
             logits = self.model.forward(tokens[:, prev_pos:cur_pos], prev_pos)
+            token_times.append(time.time() - t)
+            token_times_wnd = token_times[-3:]
+            tokens_per_sec = len(token_times_wnd) / sum(token_times_wnd)
+            print("\rtokens generated: {:d}, tokens/sec: {:.2f}".format(len(token_times), tokens_per_sec), end="")
             if logprobs:
                 token_logprobs[:, prev_pos + 1 : cur_pos + 1] = -F.cross_entropy(
                     input=logits.transpose(1, 2),
